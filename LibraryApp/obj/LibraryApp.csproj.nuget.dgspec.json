@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\HP\\Desktop\\GitHub\\LibraryApp\\LibraryApp.csproj": {}
+    "C:\\Users\\HP\\Desktop\\GitHub\\LibraryAppGitHub\\LibraryApp\\LibraryApp.csproj": {}
   },
   "projects": {
-    "C:\\Users\\HP\\Desktop\\GitHub\\LibraryApp\\LibraryApp.csproj": {
+    "C:\\Users\\HP\\Desktop\\GitHub\\LibraryAppGitHub\\LibraryApp\\LibraryApp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\HP\\Desktop\\GitHub\\LibraryApp\\LibraryApp.csproj",
+        "projectUniqueName": "C:\\Users\\HP\\Desktop\\GitHub\\LibraryAppGitHub\\LibraryApp\\LibraryApp.csproj",
         "projectName": "LibraryApp",
-        "projectPath": "C:\\Users\\HP\\Desktop\\GitHub\\LibraryApp\\LibraryApp.csproj",
+        "projectPath": "C:\\Users\\HP\\Desktop\\GitHub\\LibraryAppGitHub\\LibraryApp\\LibraryApp.csproj",
         "packagesPath": "C:\\Users\\HP\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\HP\\Desktop\\GitHub\\LibraryApp\\obj\\",
+        "outputPath": "C:\\Users\\HP\\Desktop\\GitHub\\LibraryAppGitHub\\LibraryApp\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -50,6 +50,10 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
             "Microsoft.EntityFrameworkCore.SqlServer": {
               "target": "Package",
               "version": "[9.0.8, )"
@@ -60,9 +64,17 @@
               "target": "Package",
               "version": "[9.0.8, )"
             },
+            "Microsoft.IdentityModel.Tokens": {
+              "target": "Package",
+              "version": "[7.4.0, )"
+            },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.6.2, )"
+            },
+            "System.IdentityModel.Tokens.Jwt": {
+              "target": "Package",
+              "version": "[7.4.0, )"
             }
           },
           "imports": [

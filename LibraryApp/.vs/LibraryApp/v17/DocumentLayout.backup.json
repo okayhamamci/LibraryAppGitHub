@@ -1,12 +1,140 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\HP\\Desktop\\GitHub\\LibraryApp\\",
-  "Documents": [],
+  "WorkspaceRootPath": "C:\\Users\\HP\\Desktop\\GitHub\\LibraryAppGitHub\\LibraryApp\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{ADC50302-DCC4-4EE2-9A81-F9A973FD1048}|LibraryApp.csproj|c:\\users\\hp\\desktop\\github\\libraryappgithub\\libraryapp\\controllers\\borrowcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{ADC50302-DCC4-4EE2-9A81-F9A973FD1048}|LibraryApp.csproj|solutionrelative:controllers\\borrowcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ADC50302-DCC4-4EE2-9A81-F9A973FD1048}|LibraryApp.csproj|c:\\users\\hp\\desktop\\github\\libraryappgithub\\libraryapp\\models\\dtos\\borrowrecorddto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{ADC50302-DCC4-4EE2-9A81-F9A973FD1048}|LibraryApp.csproj|solutionrelative:models\\dtos\\borrowrecorddto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ADC50302-DCC4-4EE2-9A81-F9A973FD1048}|LibraryApp.csproj|c:\\users\\hp\\desktop\\github\\libraryappgithub\\libraryapp\\controllers\\usercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{ADC50302-DCC4-4EE2-9A81-F9A973FD1048}|LibraryApp.csproj|solutionrelative:controllers\\usercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ADC50302-DCC4-4EE2-9A81-F9A973FD1048}|LibraryApp.csproj|c:\\users\\hp\\desktop\\github\\libraryappgithub\\libraryapp\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{ADC50302-DCC4-4EE2-9A81-F9A973FD1048}|LibraryApp.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ADC50302-DCC4-4EE2-9A81-F9A973FD1048}|LibraryApp.csproj|c:\\users\\hp\\desktop\\github\\libraryappgithub\\libraryapp\\models\\dtos\\registerrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{ADC50302-DCC4-4EE2-9A81-F9A973FD1048}|LibraryApp.csproj|solutionrelative:models\\dtos\\registerrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ADC50302-DCC4-4EE2-9A81-F9A973FD1048}|LibraryApp.csproj|c:\\users\\hp\\desktop\\github\\libraryappgithub\\libraryapp\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{ADC50302-DCC4-4EE2-9A81-F9A973FD1048}|LibraryApp.csproj|solutionrelative:models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ADC50302-DCC4-4EE2-9A81-F9A973FD1048}|LibraryApp.csproj|c:\\users\\hp\\desktop\\github\\libraryappgithub\\libraryapp\\controllers\\weatherforecastcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{ADC50302-DCC4-4EE2-9A81-F9A973FD1048}|LibraryApp.csproj|solutionrelative:controllers\\weatherforecastcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": []
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "BorrowController.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\Desktop\\GitHub\\LibraryAppGitHub\\LibraryApp\\Controllers\\BorrowController.cs",
+              "RelativeDocumentMoniker": "Controllers\\BorrowController.cs",
+              "ToolTip": "C:\\Users\\HP\\Desktop\\GitHub\\LibraryAppGitHub\\LibraryApp\\Controllers\\BorrowController.cs",
+              "RelativeToolTip": "Controllers\\BorrowController.cs",
+              "ViewState": "AgIAAFEAAAAAAAAAAAAawF8AAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-11T06:33:36.307Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "BorrowRecordDTO.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\Desktop\\GitHub\\LibraryAppGitHub\\LibraryApp\\Models\\DTOs\\BorrowRecordDTO.cs",
+              "RelativeDocumentMoniker": "Models\\DTOs\\BorrowRecordDTO.cs",
+              "ToolTip": "C:\\Users\\HP\\Desktop\\GitHub\\LibraryAppGitHub\\LibraryApp\\Models\\DTOs\\BorrowRecordDTO.cs",
+              "RelativeToolTip": "Models\\DTOs\\BorrowRecordDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAwAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-11T14:24:02.243Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "registerRequestDTO.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\Desktop\\GitHub\\LibraryAppGitHub\\LibraryApp\\Models\\DTOs\\registerRequestDTO.cs",
+              "RelativeDocumentMoniker": "Models\\DTOs\\registerRequestDTO.cs",
+              "ToolTip": "C:\\Users\\HP\\Desktop\\GitHub\\LibraryAppGitHub\\LibraryApp\\Models\\DTOs\\registerRequestDTO.cs",
+              "RelativeToolTip": "Models\\DTOs\\registerRequestDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-11T07:10:41.089Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\Desktop\\GitHub\\LibraryAppGitHub\\LibraryApp\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "C:\\Users\\HP\\Desktop\\GitHub\\LibraryAppGitHub\\LibraryApp\\Program.cs",
+              "RelativeToolTip": "Program.cs",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAAABIAAAAZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-11T06:51:52.214Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "User.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\Desktop\\GitHub\\LibraryAppGitHub\\LibraryApp\\Models\\User.cs",
+              "RelativeDocumentMoniker": "Models\\User.cs",
+              "ToolTip": "C:\\Users\\HP\\Desktop\\GitHub\\LibraryAppGitHub\\LibraryApp\\Models\\User.cs",
+              "RelativeToolTip": "Models\\User.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAABEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-11T06:46:25.199Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "UserController.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\Desktop\\GitHub\\LibraryAppGitHub\\LibraryApp\\Controllers\\UserController.cs",
+              "RelativeDocumentMoniker": "Controllers\\UserController.cs",
+              "ToolTip": "C:\\Users\\HP\\Desktop\\GitHub\\LibraryAppGitHub\\LibraryApp\\Controllers\\UserController.cs",
+              "RelativeToolTip": "Controllers\\UserController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-11T06:32:46.019Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "WeatherForecastController.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\Desktop\\GitHub\\LibraryAppGitHub\\LibraryApp\\Controllers\\WeatherForecastController.cs",
+              "RelativeDocumentMoniker": "Controllers\\WeatherForecastController.cs",
+              "ToolTip": "C:\\Users\\HP\\Desktop\\GitHub\\LibraryAppGitHub\\LibraryApp\\Controllers\\WeatherForecastController.cs",
+              "RelativeToolTip": "Controllers\\WeatherForecastController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-11T06:32:57.059Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
     }
   ]
 }

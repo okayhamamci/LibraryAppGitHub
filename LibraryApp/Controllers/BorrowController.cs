@@ -68,7 +68,7 @@ namespace LibraryApp.Controllers
                 .OrderByDescending(r => r.BorrowedAt)
                 .Select(r => new BorrowRecordDTO
                 {
-                    Id = r.Id,
+                    Id = r.Book.Id,
                     Title = r.Book.Title,
                     Author = r.Book.Author,
                     BorrowedAt = r.BorrowedAt,
@@ -79,7 +79,6 @@ namespace LibraryApp.Controllers
             return Ok(items);
         }
 
-        // (optional) GET /api/borrow/my/ongoing
         [HttpGet("my/ongoing")]
         public async Task<IActionResult> GetMyOngoing()
         {
@@ -92,7 +91,7 @@ namespace LibraryApp.Controllers
                 .OrderByDescending(r => r.BorrowedAt)
                 .Select(r => new BorrowRecordDTO
                 {
-                    Id = r.Id,
+                    Id = r.Book.Id,
                     Title = r.Book.Title,
                     Author = r.Book.Author,
                     BorrowedAt = r.BorrowedAt,

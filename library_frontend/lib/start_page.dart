@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:library_frontend/api_service.dart';
+import 'package:library_frontend/library_home.dart';
 import 'package:provider/provider.dart';
 
 class StartPage extends StatefulWidget {
@@ -10,10 +11,8 @@ class StartPage extends StatefulWidget {
 }
 
 class _StartPageState extends State<StartPage> {
-  // ← form key
   final _formKey = GlobalKey<FormState>();
 
-  // controllers for both login & register
   final TextEditingController nameController     = TextEditingController();
   final TextEditingController emailController    = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -38,8 +37,12 @@ class _StartPageState extends State<StartPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('User logged in successfully!')),
         );
+        if (!context.mounted) return;
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (ctx) => const LibraryHome()),
+          );
         
-        //Navigator.of(context).pushReplacement(MaterialPageRoute(builder: builder));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text(
@@ -64,7 +67,7 @@ class _StartPageState extends State<StartPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('User registered successfully!'))
         );
-        // Navigator.of(context)… go to login or home
+
       } else if (status == 409) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('That email is already registered.'))
@@ -80,7 +83,7 @@ class _StartPageState extends State<StartPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black.withOpacity(0.89),
+      backgroundColor: const Color.fromARGB(255, 43, 49, 71),
       body: Center(
         child: Container(
           height: 450,
@@ -91,7 +94,6 @@ class _StartPageState extends State<StartPage> {
           clipBehavior: Clip.hardEdge,
           child: Column(
             children: [
-              // Top tabs
               SizedBox(
                 height: 60,
                 child: Row(
@@ -152,7 +154,6 @@ class _StartPageState extends State<StartPage> {
                 ),
               ),
 
-              // Bottom content
               Expanded(
                 child: Container(
                   color: Colors.white,
@@ -197,7 +198,7 @@ class _StartPageState extends State<StartPage> {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color.fromARGB(255, 14, 12, 63),
             ),
-            child: const Text('Login'),
+            child: const Text('Login', style: TextStyle(color: Colors.white),),
           ),
         ],
       );
@@ -234,7 +235,7 @@ class _StartPageState extends State<StartPage> {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color.fromARGB(255, 14, 12, 63),
             ),
-            child: const Text('Register'),
+            child: const Text('Register', style: TextStyle(color: Colors.white),),
           ),
         ],
       );

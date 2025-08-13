@@ -1,6 +1,8 @@
 // lib/api_service.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:library_frontend/Models-Providers/book.dart';
+import 'package:library_frontend/Models-Providers/borrowrecord.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
@@ -21,7 +23,6 @@ static const String _baseUrl = 'https://localhost:7270/api/';
       }),
     );
 
-  print(response.statusCode);
   if (response.statusCode == 200 || response.statusCode == 204) {
     final data = jsonDecode(response.body) as Map<String, dynamic>;
     final token = data['accessToken'] as String?;
@@ -53,5 +54,63 @@ static const String _baseUrl = 'https://localhost:7270/api/';
     );
 
     return response.statusCode;
+  }
+
+    static Future<String?> _token() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('jwt_token');
+  }
+
+  static Future<List<Book>> fetchAvailableBooks() async {
+    final res = await http.get(
+      Uri.parse('${_baseUrl}book/GetAvailableBooks'),
+      headers: {'Accept': 'application/json'},
+    );
+    if (res.statusCode != 200) {
+      throw Exception('Available books failed: ${res.statusCode} ${res.body}');
+    }
+    final list = jsonDecode(res.body) as List;
+    return list.map((e) => Book.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  static Future<List<BorrowRecord>> fetchMyBorrowings({required bool ongoingOnly}) async {
+    final token = await _token();
+    if (token == null) throw Exception('Not authenticated');
+
+    final path = ongoingOnly ? 'borrow/my/ongoing' : 'borrow/my/all';
+    final res = await http.get(
+      Uri.parse('$_baseUrl$path'),
+      headers: {'Accept': 'application/json', 'Authorization': 'Bearer $token'},
+    );
+    if (res.statusCode == 401) throw Exception('Unauthorized – please log in again.');
+    if (res.statusCode != 200) {
+      throw Exception('Borrowings failed: ${res.statusCode} ${res.body}');
+    }
+    final list = jsonDecode(res.body) as List;
+    return list.map((e) => BorrowRecord.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  static Future<void> borrowBook(int bookId) async {
+    final token = await _token();
+    if (token == null) throw Exception('Not authenticated');
+    final res = await http.post(
+      Uri.parse('${_baseUrl}borrow/BorrowBook/$bookId'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (res.statusCode != 200) {
+      throw Exception('Borrow failed: ${res.statusCode} ${res.body}');
+    }
+  }
+
+  static Future<void> returnBook(int bookId) async {
+    final token = await _token();
+    if (token == null) throw Exception('Not authenticated');
+    final res = await http.post(
+      Uri.parse('${_baseUrl}borrow/ReturnBook/$bookId'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (res.statusCode != 200) {
+      throw Exception('Return failed: ${res.statusCode} ${res.body}');
+    }
   }
 }

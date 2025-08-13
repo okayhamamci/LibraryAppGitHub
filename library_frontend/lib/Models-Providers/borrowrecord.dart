@@ -13,12 +13,14 @@ class BorrowRecord {
     this.returnedAt,
   });
 
-  factory BorrowRecord.fromJson(Map<String, dynamic> j) => BorrowRecord(
-    id: j['id'],
-    bookId: j['bookId'],
-    title: j['title'],
-    author: j['author'],
-    borrowedAt: DateTime.parse(j['borrowedAt']),
-    returnedAt: j['returnedAt'] == null ? null : DateTime.parse(j['returnedAt']),
-  );
+factory BorrowRecord.fromJson(Map<String, dynamic> j) => BorrowRecord(
+  id: (j['id'] as num?)?.toInt() ?? 0,         
+  bookId: (j['id'] as num?)?.toInt() ?? 0,  
+  title: j['title'] as String? ?? '',
+  author: j['author'] as String? ?? '',
+  borrowedAt: DateTime.parse(j['borrowedAt'] as String),
+  returnedAt: j['returnedAt'] == null
+      ? null
+      : DateTime.parse(j['returnedAt'] as String),
+);
 }

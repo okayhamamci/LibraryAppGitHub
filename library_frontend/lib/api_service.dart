@@ -73,6 +73,18 @@ static const String _baseUrl = 'https://localhost:7270/api/';
     return list.map((e) => Book.fromJson(e as Map<String, dynamic>)).toList();
   }
 
+    static Future<List<Book>> fetchArchivedBooks() async {
+    final res = await http.get(
+      Uri.parse('${_baseUrl}book/GetArchivedBooks'),
+      headers: {'Accept': 'application/json'},
+    );
+    if (res.statusCode != 200) {
+      throw Exception('Available books failed: ${res.statusCode} ${res.body}');
+    }
+    final list = jsonDecode(res.body) as List;
+    return list.map((e) => Book.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
   static Future<List<BorrowRecord>> fetchMyBorrowings({required bool ongoingOnly}) async {
     final token = await _token();
     if (token == null) throw Exception('Not authenticated');
@@ -109,6 +121,51 @@ static const String _baseUrl = 'https://localhost:7270/api/';
       Uri.parse('${_baseUrl}borrow/ReturnBook/$bookId'),
       headers: {'Authorization': 'Bearer $token'},
     );
+    if (res.statusCode != 200) {
+      throw Exception('Return failed: ${res.statusCode} ${res.body}');
+    }
+  }
+
+  static Future<void> deleteBook(int bookId) async {
+    final token = await _token();
+    if (token == null) throw Exception('Not authenticated');
+    final res = await http.patch(
+      Uri.parse('${_baseUrl}book/ArchiveBook/$bookId'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (res.statusCode != 204) {
+      throw Exception('Return failed: ${res.statusCode} ${res.body}');
+    }
+  }
+
+    static Future<void> unArchiveBook(int bookId) async {
+    final token = await _token();
+    if (token == null) throw Exception('Not authenticated');
+    final res = await http.patch(
+      Uri.parse('${_baseUrl}book/UnarchiveBook/$bookId'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (res.statusCode != 204) {
+      throw Exception('Return failed: ${res.statusCode} ${res.body}');
+    }
+  }
+
+    static Future<void> addBook(String title, String author) async {
+    final token = await _token();
+    if (token == null) throw Exception('Not authenticated');
+    Uri url = Uri.parse("${_baseUrl}book/addBook");
+    final res = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: jsonEncode({
+        'Title': title,
+        'Author': author,
+      }),
+    );
+
     if (res.statusCode != 200) {
       throw Exception('Return failed: ${res.statusCode} ${res.body}');
     }

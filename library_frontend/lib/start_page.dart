@@ -16,42 +16,60 @@ class _StartPageState extends State<StartPage> {
   final TextEditingController nameController     = TextEditingController();
   final TextEditingController emailController    = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-
+  final TextEditingController adminPasswordController = TextEditingController();
+  bool _adminLoginClicked = false;
   bool isRegister = false;
+  static const String _adminPassword = "admin123";
 
   @override
   void dispose() {
     nameController.dispose();
     emailController.dispose();
     passwordController.dispose();
+    adminPasswordController.dispose();
     super.dispose();
   }
 
   Future<void> _login() async {
-    if (_formKey.currentState!.validate()) {
-      final pass  = passwordController.text;
-      final email = emailController.text;
+    if (!_formKey.currentState!.validate()) return;
 
-      String? token = await ApiService.login(pass, email);
-      if (token != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('User logged in successfully!')),
-        );
-        if (!context.mounted) return;
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (ctx) => const LibraryHome()),
-          );
-        
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text(
-            'Failed to login. Check your email and password!'
-          )),
-        );
-      }
+    final pass = passwordController.text;
+    final email = emailController.text;
+    final adminPass = adminPasswordController.text;
+
+    if (_adminLoginClicked && adminPass.isEmpty) {
+      _showSnack('Please enter the admin password or login as a user!');
+      return;
     }
+
+    String? token = await ApiService.login(pass, email);
+
+    if (token == null) {
+      _showSnack('Failed to login. Check your email and password!');
+      return;
+    }
+
+    if (_adminLoginClicked && adminPass != _adminPassword) {
+      _showSnack('Failed to login. Check your admin password!');
+      return;
+    }
+
+    _showSnack(_adminLoginClicked
+        ? 'Admin logged in successfully!'
+        : 'User logged in successfully!');
+
+    if (!context.mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (ctx) => _adminLoginClicked ? const LibraryAdmin() : const LibraryHome()),
+    );
   }
+
+void _showSnack(String message) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(message)),
+  );
+}
 
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
@@ -192,6 +210,32 @@ class _StartPageState extends State<StartPage> {
             validator: (v) =>
                 (v == null || v.isEmpty) ? 'Please enter your password' : null,
           ),
+          const SizedBox(height: 45,),
+          Row(
+            children: [
+              const Text("Please Click the Button For Admin Login"),
+              const Spacer(),
+              Checkbox(
+                  value: _adminLoginClicked,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      _adminLoginClicked = value ?? false;
+                    });
+                  },
+              ),
+            ],
+          ),
+          if(_adminLoginClicked)
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: TextField(
+                controller: adminPasswordController,
+                decoration: const InputDecoration(
+                  labelText: "Enter The Admin Password Please!",
+                ),
+                obscureText: true,
+                ),
+              ),
           const Spacer(),
           ElevatedButton(
             onPressed: _login,

@@ -15,14 +15,13 @@ class LibraryHome extends StatefulWidget {
 class _LibraryHomeState extends State<LibraryHome> {
   int _index = 0;
 
-  // NEW: keys to reach child states
   final _booksKey = GlobalKey<_AvailableBooksTabState>();
   final _borrowsKey = GlobalKey<_MyBorrowingsTabState>();
 
-  // NEW: called after any borrow/return to refresh both sides
+
   void _onLibraryChanged() {
-    _booksKey.currentState?.refresh();        // re-fetch available books
-    _borrowsKey.currentState?.refreshBoth();  // re-fetch ongoing+all borrowings
+    _booksKey.currentState?.refresh();       
+    _borrowsKey.currentState?.refreshBoth();  
   }
 
   @override
@@ -31,16 +30,15 @@ class _LibraryHomeState extends State<LibraryHome> {
       body: IndexedStack(
         index: _index,
         children: [
-          AvailableBooksTab(key: _booksKey, onChanged: _onLibraryChanged), // ← pass callback
+          AvailableBooksTab(key: _booksKey, onChanged: _onLibraryChanged), 
           const EmptyTab(),
-          MyBorrowingsTab(key: _borrowsKey, onChanged: _onLibraryChanged), // ← pass callback
+          MyBorrowingsTab(key: _borrowsKey, onChanged: _onLibraryChanged), 
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _index,
         onTap: (i) {
           setState(() => _index = i);
-          // also refresh when user lands on a tab
           if (i == 0) _booksKey.currentState?.refresh();
           if (i == 2) _borrowsKey.currentState?.refreshBoth();
         },
@@ -56,8 +54,10 @@ class _LibraryHomeState extends State<LibraryHome> {
 
 /// ======== TAB 1: AVAILABLE BOOKS ======== ///
 class AvailableBooksTab extends StatefulWidget {
-  const AvailableBooksTab({super.key, this.onChanged});
+  const AvailableBooksTab({this.isAdmin = false, super.key, this.onChanged, this.isArchive = false});
   final VoidCallback? onChanged;
+  final bool isAdmin;
+  final bool isArchive;
   @override
   State<AvailableBooksTab> createState() => _AvailableBooksTabState();
 }
@@ -68,11 +68,20 @@ class _AvailableBooksTabState extends State<AvailableBooksTab> with AutomaticKee
   @override
   void initState() {
     super.initState();
-    _future = ApiService.fetchAvailableBooks();
+    if(widget.isArchive){
+      _future = ApiService.fetchArchivedBooks();
+    } else {
+      _future = ApiService.fetchAvailableBooks();
+    }
   }
 
   Future<void> _refresh() async {
-    final f = ApiService.fetchAvailableBooks();
+    final f;
+    if(widget.isArchive){
+      f = ApiService.fetchArchivedBooks();
+    } else {
+      f = ApiService.fetchAvailableBooks();
+    }
     setState(() { _future = f; });  
     await f;   
   }
@@ -83,7 +92,85 @@ class _AvailableBooksTabState extends State<AvailableBooksTab> with AutomaticKee
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Available Books')),
+      appBar: AppBar(
+        title: Text(!widget.isArchive ? 'Available Books' : "Archived Books"),
+        actions: [
+  if (widget.isAdmin)
+    IconButton(
+      icon: const Icon(Icons.add),
+      onPressed: () {
+        final titleController = TextEditingController();
+        final authorController = TextEditingController();
+
+        showDialog(
+          context: context,
+          builder: (ctx) {
+            return AlertDialog(
+              title: const Text('Add New Book'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: titleController,
+                    decoration: const InputDecoration(
+                      labelText: 'Book Title',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: authorController,
+                    decoration: const InputDecoration(
+                      labelText: 'Author',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final title = titleController.text.trim();
+                    final author = authorController.text.trim();
+
+                    if (title.isEmpty || author.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Please fill both fields')),
+                      );
+                      return;
+                    }
+                    try {
+                      await ApiService.addBook(title, author);
+                      if (context.mounted) {
+                        Navigator.of(ctx).pop();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Book added successfully')),
+                        );
+                        await _refresh(); // refresh list
+                        widget.onChanged?.call();
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Error: $e')),
+                        );
+                      }
+                    }
+                  },
+                  child: const Text('Add'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    ),
+],
+      ),
       body: RefreshIndicator(
         onRefresh: _refresh,
         child: FutureBuilder<List<Book>>(
@@ -106,28 +193,48 @@ class _AvailableBooksTabState extends State<AvailableBooksTab> with AutomaticKee
                   title: Text(b.title),
                   subtitle: Text(b.author),
                   trailing: TextButton(
-                    onPressed: () async {
-                      try {
+                  onPressed: () async {
+                    try {
+                      if (widget.isAdmin) {
+                        // Remove book
+                        await ApiService.deleteBook(b.id);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Book archived!')),
+                          );
+                        }
+                      } else if(widget.isArchive) {
+                        await ApiService.unArchiveBook(b.id);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Unarchived!')),
+                          );
+                        }
+                      }
+                      else {
+                        // Borrow book
                         await ApiService.borrowBook(b.id);
-
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Borrowed!')),
                           );
                         }
-                        
-                        await _refresh();           
-                        widget.onChanged?.call(); 
-                      } catch (e) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(e.toString())),
-                          );
-                        }
                       }
-                    },
-                    child: const Text('Borrow'),
-                  ),
+
+                      await _refresh();
+                      widget.onChanged?.call();
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(e.toString())),
+                        );
+                      }
+                    }
+                  },
+                  child: Text(widget.isAdmin 
+                  ? 'Archive' 
+                  : widget.isArchive ? "Unarchive" :'Borrow'),
+                ),
                 );
               },
               separatorBuilder: (_, __) => const Divider(height: 1),
@@ -143,7 +250,7 @@ class _AvailableBooksTabState extends State<AvailableBooksTab> with AutomaticKee
   bool get wantKeepAlive => true;
 }
 
-/// ======== TAB 2: EMPTY PLACEHOLDER ========
+/// ======== TAB 2: EMPTY PLACEHOLDER ======== ///
 class EmptyTab extends StatelessWidget {
   const EmptyTab({super.key});
   @override
@@ -296,6 +403,56 @@ class _BorrowingsListState extends State<_BorrowingsList> {
     );
   }
 }
+
+class LibraryAdmin extends StatefulWidget{
+
+  const LibraryAdmin({super.key});
+
+  @override
+  State<LibraryAdmin> createState() => _LibraryAdminState();
+}
+
+class _LibraryAdminState extends State<LibraryAdmin> {
+  int _index = 0;
+
+  final _booksKey = GlobalKey<_AvailableBooksTabState>();
+  final _borrowsKey = GlobalKey<_MyBorrowingsTabState>();
+  final _archiveKey = GlobalKey<_AvailableBooksTabState>();
+
+  void _onLibraryChanged() {
+    _booksKey.currentState?.refresh();       
+    _borrowsKey.currentState?.refreshBoth();  
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: IndexedStack(
+        index: _index,
+        children: [
+          AvailableBooksTab(key: _booksKey, onChanged: _onLibraryChanged, isAdmin: true), 
+          AvailableBooksTab(key: _archiveKey, onChanged: _onLibraryChanged, isArchive: true,), 
+          MyBorrowingsTab(key: _borrowsKey, onChanged: _onLibraryChanged), 
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _index,
+        onTap: (i) {
+          setState(() => _index = i);
+          if (i == 0) _booksKey.currentState?.refresh();
+          if (i == 2) _borrowsKey.currentState?.refreshBoth();
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.menu_book_outlined), label: 'Books'),
+          BottomNavigationBarItem(icon: Icon(Icons.explore_outlined), label: 'Archive'),
+          BottomNavigationBarItem(icon: Icon(Icons.library_books_outlined), label: 'Borrowings'),
+        ],
+      ),
+    );
+  }
+}
+
+
 
 class _ErrorView extends StatelessWidget {
   final String message;

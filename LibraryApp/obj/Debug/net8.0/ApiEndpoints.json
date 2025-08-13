@@ -33,12 +33,70 @@
   },
   {
     "ContainingType": "LibraryApp.Controllers.BookController",
+    "Method": "addBook",
+    "RelativePath": "api/Book/addBook",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "LibraryApp.Models.DTOs.BookAddRequestDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "LibraryApp.Controllers.BookController",
+    "Method": "ArchiveBook",
+    "RelativePath": "api/Book/ArchiveBook/{id}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "LibraryApp.Controllers.BookController",
+    "Method": "GetArchivedBooks",
+    "RelativePath": "api/Book/GetArchivedBooks",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "LibraryApp.Controllers.BookController",
     "Method": "GetAvailableBooks",
     "RelativePath": "api/Book/GetAvailableBooks",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "LibraryApp.Controllers.BookController",
+    "Method": "UnarchiveBook",
+    "RelativePath": "api/Book/UnarchiveBook/{id}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
     "ReturnTypes": []
   },
   {

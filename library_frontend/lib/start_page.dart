@@ -98,98 +98,112 @@ void _showSnack(String message) {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 43, 49, 71),
-      body: Center(
-        child: Container(
-          height: 450,
-          width: 450,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          clipBehavior: Clip.hardEdge,
-          child: Column(
-            children: [
-              SizedBox(
-                height: 60,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => setState(() => isRegister = false),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: isRegister
-                                ? Colors.white
-                                : const Color.fromARGB(255, 14, 12, 63),
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(16),
-                            ),
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            'Login',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: !isRegister
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: Stack(
+      fit: StackFit.expand,
+      children: [
+        Image.asset(
+          'assets/lib.png', 
+          fit: BoxFit.cover,
+        ),
+
+        Container(
+          color: const Color.fromARGB(255, 13, 56, 131).withOpacity(0.25),
+        ),
+
+        Center(
+          child: Container(
+            height: 450,
+            width: 450,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            clipBehavior: Clip.hardEdge,
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 60,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => setState(() => isRegister = false),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: isRegister
                                   ? Colors.white
                                   : const Color.fromARGB(255, 14, 12, 63),
-                              fontWeight: FontWeight.bold,
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(16),
+                              ),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              'Login',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: !isRegister
+                                    ? Colors.white
+                                    : const Color.fromARGB(255, 14, 12, 63),
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => setState(() => isRegister = true),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: isRegister
-                                ? const Color.fromARGB(255, 14, 12, 63)
-                                : Colors.white,
-                            borderRadius: const BorderRadius.only(
-                              topRight: Radius.circular(16),
-                            ),
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            'Register',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: !isRegister
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => setState(() => isRegister = true),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: isRegister
                                   ? const Color.fromARGB(255, 14, 12, 63)
                                   : Colors.white,
-                              fontWeight: FontWeight.bold,
+                              borderRadius: const BorderRadius.only(
+                                topRight: Radius.circular(16),
+                              ),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              'Register',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: !isRegister
+                                    ? const Color.fromARGB(255, 14, 12, 63)
+                                    : Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-
-              Expanded(
-                child: Container(
-                  color: Colors.white,
-                  padding: const EdgeInsets.all(24),
-                  child: Form(
-                    key: _formKey,
-                    child: isRegister
-                        ? _buildRegisterForm()
-                        : _buildLoginForm(),
+                    ],
                   ),
                 ),
-              ),
-            ],
+
+                Expanded(
+                  child: Container(
+                    color: Colors.white,
+                    padding: const EdgeInsets.all(24),
+                    child: Form(
+                      key: _formKey,
+                      child: isRegister
+                          ? _buildRegisterForm()
+                          : _buildLoginForm(),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    );
-  }
+      ],
+    ),
+  );
+}
+
 
   Widget _buildLoginForm() => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

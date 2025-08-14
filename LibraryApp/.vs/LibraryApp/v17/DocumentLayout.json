@@ -3,12 +3,16 @@
   "WorkspaceRootPath": "C:\\Users\\HP\\Desktop\\GitHub\\LibraryAppGitHub\\LibraryApp\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{ADC50302-DCC4-4EE2-9A81-F9A973FD1048}|LibraryApp.csproj|c:\\users\\hp\\desktop\\github\\libraryappgithub\\libraryapp\\controllers\\borrowcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{ADC50302-DCC4-4EE2-9A81-F9A973FD1048}|LibraryApp.csproj|solutionrelative:controllers\\borrowcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{ADC50302-DCC4-4EE2-9A81-F9A973FD1048}|LibraryApp.csproj|c:\\users\\hp\\desktop\\github\\libraryappgithub\\libraryapp\\controllers\\bookcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{ADC50302-DCC4-4EE2-9A81-F9A973FD1048}|LibraryApp.csproj|solutionrelative:controllers\\bookcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ADC50302-DCC4-4EE2-9A81-F9A973FD1048}|LibraryApp.csproj|c:\\users\\hp\\desktop\\github\\libraryappgithub\\libraryapp\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{ADC50302-DCC4-4EE2-9A81-F9A973FD1048}|LibraryApp.csproj|solutionrelative:controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ADC50302-DCC4-4EE2-9A81-F9A973FD1048}|LibraryApp.csproj|c:\\users\\hp\\desktop\\github\\libraryappgithub\\libraryapp\\controllers\\borrowcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{ADC50302-DCC4-4EE2-9A81-F9A973FD1048}|LibraryApp.csproj|solutionrelative:controllers\\borrowcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -18,17 +22,17 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "BookController.cs",
               "DocumentMoniker": "C:\\Users\\HP\\Desktop\\GitHub\\LibraryAppGitHub\\LibraryApp\\Controllers\\BookController.cs",
               "RelativeDocumentMoniker": "Controllers\\BookController.cs",
               "ToolTip": "C:\\Users\\HP\\Desktop\\GitHub\\LibraryAppGitHub\\LibraryApp\\Controllers\\BookController.cs",
               "RelativeToolTip": "Controllers\\BookController.cs",
-              "ViewState": "AgIAABcAAAAAAAAAAAAiwB4AAAAmAAAAAAAAAA==",
+              "ViewState": "AgIAADIAAAAAAAAAAAAiwE0AAAAQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-08-12T07:40:17.933Z",
               "IsPinned": true,
@@ -36,13 +40,26 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\Desktop\\GitHub\\LibraryAppGitHub\\LibraryApp\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "Controllers\\AuthController.cs",
+              "ToolTip": "C:\\Users\\HP\\Desktop\\GitHub\\LibraryAppGitHub\\LibraryApp\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "Controllers\\AuthController.cs",
+              "ViewState": "AgIAABkAAAAAAAAAAAAQwB0AAABPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-14T10:48:01.842Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "BorrowController.cs",
               "DocumentMoniker": "C:\\Users\\HP\\Desktop\\GitHub\\LibraryAppGitHub\\LibraryApp\\Controllers\\BorrowController.cs",
               "RelativeDocumentMoniker": "Controllers\\BorrowController.cs",
               "ToolTip": "C:\\Users\\HP\\Desktop\\GitHub\\LibraryAppGitHub\\LibraryApp\\Controllers\\BorrowController.cs",
               "RelativeToolTip": "Controllers\\BorrowController.cs",
-              "ViewState": "AgIAAH4AAAAAAAAAAAAAwJUAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAQAAAAAAAAAAAAcwA0AAAAyAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-08-13T08:30:11.125Z",
               "EditorCaption": ""

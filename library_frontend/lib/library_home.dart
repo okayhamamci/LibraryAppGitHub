@@ -263,8 +263,9 @@ class EmptyTab extends StatelessWidget {
 
 /// ======== TAB 3: MY BORROWINGS (Ongoing / All) ========
 class MyBorrowingsTab extends StatefulWidget {
-  const MyBorrowingsTab({super.key, this.onChanged});
+  const MyBorrowingsTab({super.key, this.onChanged, this.isAdmin = false});
   final VoidCallback? onChanged;
+  final bool isAdmin;
   @override
   State<MyBorrowingsTab> createState() => _MyBorrowingsTabState();
 }
@@ -276,18 +277,33 @@ class _MyBorrowingsTabState extends State<MyBorrowingsTab> with AutomaticKeepAli
   @override
   void initState() {
     super.initState();
-    _ongoingFuture = ApiService.fetchMyBorrowings(ongoingOnly: true);
-    _allFuture = ApiService.fetchMyBorrowings(ongoingOnly: false);
+    if(widget.isAdmin){
+      _ongoingFuture = ApiService.fetchMyBorrowingsAdmin(ongoingOnly: true);
+      _allFuture = ApiService.fetchMyBorrowingsAdmin(ongoingOnly: false);
+    } else {
+      _ongoingFuture = ApiService.fetchMyBorrowings(ongoingOnly: true);
+      _allFuture = ApiService.fetchMyBorrowings(ongoingOnly: false);
+    }
   }
 
   Future<void> _refreshOngoing() async {
-    final f = ApiService.fetchMyBorrowings(ongoingOnly: true);
+    final f;
+    if(widget.isAdmin){
+      f = ApiService.fetchMyBorrowingsAdmin(ongoingOnly: true);
+    } else {
+      f = ApiService.fetchMyBorrowings(ongoingOnly: true);
+    }
     setState(() { _ongoingFuture = f; });
     await f;
   }
 
   Future<void> _refreshAll() async {
-    final f = ApiService.fetchMyBorrowings(ongoingOnly: false);
+    final f;
+    if(widget.isAdmin){
+      f = ApiService.fetchMyBorrowingsAdmin(ongoingOnly: false);
+    } else {
+      f = ApiService.fetchMyBorrowings(ongoingOnly: false);
+    }
     setState(() { _allFuture = f; });
     await f;
   }
@@ -311,8 +327,8 @@ class _MyBorrowingsTabState extends State<MyBorrowingsTab> with AutomaticKeepAli
         ),
         body: TabBarView(
           children: [
-            _BorrowingsList(future: _ongoingFuture, onRefresh: _refreshOngoing, showReturn: true, onChanged: widget.onChanged,),
-            _BorrowingsList(future: _allFuture, onRefresh: _refreshAll, showReturn: false, onChanged: widget.onChanged,),
+            _BorrowingsList(future: _ongoingFuture, onRefresh: _refreshOngoing, showReturn: true, onChanged: widget.onChanged, isAdmin: widget.isAdmin),
+            _BorrowingsList(future: _allFuture, onRefresh: _refreshAll, showReturn: false, onChanged: widget.onChanged, isAdmin: widget.isAdmin),
           ],
         ),
       ),
@@ -328,7 +344,8 @@ class _BorrowingsList extends StatefulWidget {
   final Future<void> Function() onRefresh;
   final bool showReturn;
   final VoidCallback? onChanged;
-  const _BorrowingsList({required this.future, required this.onRefresh, required this.showReturn, this.onChanged});
+  final bool isAdmin;
+  const _BorrowingsList({required this.future, required this.onRefresh, required this.showReturn, this.onChanged, this.isAdmin = false});
 
   @override
   State<_BorrowingsList> createState() => _BorrowingsListState();
@@ -373,10 +390,11 @@ class _BorrowingsListState extends State<_BorrowingsList> {
                 '${r.returnedAt != null ? ' |  Returned: ${_fmt(r.returnedAt!)}' : ''}',
               ),
                 isThreeLine: true,
-                trailing: (widget.showReturn && ongoing)
+                trailing: (widget.showReturn && ongoing && !widget.isAdmin)
                     ? TextButton(
                         onPressed: () async {
                           try {
+                            //print( "${r.bookId} : ${r.id}");
                             await ApiService.returnBook(r.bookId);
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -420,7 +438,8 @@ class _LibraryAdminState extends State<LibraryAdmin> {
   final _archiveKey = GlobalKey<_AvailableBooksTabState>();
 
   void _onLibraryChanged() {
-    _booksKey.currentState?.refresh();       
+    _booksKey.currentState?.refresh();      
+    _archiveKey.currentState?.refresh();  
     _borrowsKey.currentState?.refreshBoth();  
   }
 
@@ -432,7 +451,7 @@ class _LibraryAdminState extends State<LibraryAdmin> {
         children: [
           AvailableBooksTab(key: _booksKey, onChanged: _onLibraryChanged, isAdmin: true), 
           AvailableBooksTab(key: _archiveKey, onChanged: _onLibraryChanged, isArchive: true,), 
-          MyBorrowingsTab(key: _borrowsKey, onChanged: _onLibraryChanged), 
+          MyBorrowingsTab(key: _borrowsKey, onChanged: _onLibraryChanged, isAdmin: true), 
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -440,6 +459,7 @@ class _LibraryAdminState extends State<LibraryAdmin> {
         onTap: (i) {
           setState(() => _index = i);
           if (i == 0) _booksKey.currentState?.refresh();
+          if (i == 1) _archiveKey.currentState?.refresh(); 
           if (i == 2) _borrowsKey.currentState?.refreshBoth();
         },
         items: const [

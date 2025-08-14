@@ -102,6 +102,23 @@ static const String _baseUrl = 'https://localhost:7270/api/';
     return list.map((e) => BorrowRecord.fromJson(e as Map<String, dynamic>)).toList();
   }
 
+    static Future<List<BorrowRecord>> fetchMyBorrowingsAdmin({required bool ongoingOnly}) async {
+    final token = await _token();
+    if (token == null) throw Exception('Not authenticated');
+
+    final path = ongoingOnly ? 'borrow/GetAllOngoingRecords' : 'borrow/GetAllTimeRecords';
+    final res = await http.get(
+      Uri.parse('$_baseUrl$path'),
+      headers: {'Accept': 'application/json', 'Authorization': 'Bearer $token'},
+    );
+    if (res.statusCode == 401) throw Exception('Unauthorized – please log in again.');
+    if (res.statusCode != 200) {
+      throw Exception('Borrowings failed: ${res.statusCode} ${res.body}');
+    }
+    final list = jsonDecode(res.body) as List;
+    return list.map((e) => BorrowRecord.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
   static Future<void> borrowBook(int bookId) async {
     final token = await _token();
     if (token == null) throw Exception('Not authenticated');

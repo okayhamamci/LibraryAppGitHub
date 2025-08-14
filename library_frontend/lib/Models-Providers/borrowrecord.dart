@@ -14,8 +14,8 @@ class BorrowRecord {
   });
 
 factory BorrowRecord.fromJson(Map<String, dynamic> j) => BorrowRecord(
-  id: (j['id'] as num?)?.toInt() ?? 0,         
-  bookId: (j['id'] as num?)?.toInt() ?? 0,  
+  id: (j['id']) ?? 0,         
+  bookId: j['bookId'] ?? 0,  
   title: j['title'] as String? ?? '',
   author: j['author'] as String? ?? '',
   borrowedAt: DateTime.parse(j['borrowedAt'] as String),

@@ -68,7 +68,8 @@ namespace LibraryApp.Controllers
                 .OrderByDescending(r => r.BorrowedAt)
                 .Select(r => new BorrowRecordDTO
                 {
-                    Id = r.Book.Id,
+                    Id = r.Id,
+                    BookId = r.Book.Id,
                     Title = r.Book.Title,
                     Author = r.Book.Author,
                     BorrowedAt = r.BorrowedAt,
@@ -91,7 +92,8 @@ namespace LibraryApp.Controllers
                 .OrderByDescending(r => r.BorrowedAt)
                 .Select(r => new BorrowRecordDTO
                 {
-                    Id = r.Book.Id,
+                    Id = r.Id,                 
+                    BookId = r.Book.Id,
                     Title = r.Book.Title,
                     Author = r.Book.Author,
                     BorrowedAt = r.BorrowedAt,
@@ -100,6 +102,47 @@ namespace LibraryApp.Controllers
                 .ToListAsync();
 
             return Ok(items);
+        }
+
+        [HttpGet("GetAllOngoingRecords")]
+        public async Task<IActionResult> GetAllOngoingRecords(CancellationToken ct)
+        {
+            var records = await _context.BorrowRecords
+                .AsNoTracking()
+                .Where(r => r.ReturnedAt == null)
+                .OrderByDescending(r => r.BorrowedAt)
+                .Select(r => new BorrowRecordDTO
+                {
+                    Id = r.Id,                
+                    BookId = r.Book.Id,        
+                    Title = r.Book.Title,
+                    Author = r.Book.Author,
+                    BorrowedAt = r.BorrowedAt,
+                    ReturnedAt = r.ReturnedAt
+                })
+                .ToListAsync(ct);
+
+            return Ok(records);
+        }
+
+        [HttpGet("GetAllTimeRecords")]
+        public async Task<IActionResult> GetAllTimeRecords(CancellationToken ct)
+        {
+            var records = await _context.BorrowRecords
+                .AsNoTracking()
+                .OrderByDescending(r => r.BorrowedAt)
+                .Select(r => new BorrowRecordDTO
+                {
+                    Id = r.Id,                 
+                    BookId = r.Book.Id,      
+                    Title = r.Book.Title,
+                    Author = r.Book.Author,
+                    BorrowedAt = r.BorrowedAt,
+                    ReturnedAt = r.ReturnedAt
+                })
+                .ToListAsync(ct);
+
+            return Ok(records);
         }
     }
 }

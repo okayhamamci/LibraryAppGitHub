@@ -117,6 +117,26 @@
   },
   {
     "ContainingType": "LibraryApp.Controllers.BorrowController",
+    "Method": "GetAllOngoingRecords",
+    "RelativePath": "api/Borrow/GetAllOngoingRecords",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "LibraryApp.Controllers.BorrowController",
+    "Method": "GetAllTimeRecords",
+    "RelativePath": "api/Borrow/GetAllTimeRecords",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "LibraryApp.Controllers.BorrowController",
     "Method": "GetMyAll",
     "RelativePath": "api/Borrow/my/all",
     "HttpMethod": "GET",

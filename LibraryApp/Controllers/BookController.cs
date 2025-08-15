@@ -47,6 +47,10 @@ namespace LibraryApp.Controllers
             {
                 Title = dto.Title,
                 Author = dto.Author,
+                Genre = dto.Genre,
+                PageCount = dto.Page,
+                Rating = dto.Rating,
+                Description = dto.Description,
                 IsAvailable = true,
                 IsArchived = false
             };

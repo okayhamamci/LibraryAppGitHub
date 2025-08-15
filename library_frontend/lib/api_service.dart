@@ -1,6 +1,7 @@
 // lib/api_service.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:library_frontend/Models-Providers/book.dart';
 import 'package:library_frontend/Models-Providers/borrowrecord.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
 static const String _baseUrl = 'https://localhost:7270/api/';
+static const String _aiBase  = 'http://localhost:8000';
   
   static Future<String?> login(String password, String email) async {
     final url = Uri.parse("${_baseUrl}auth/login");
@@ -167,7 +169,7 @@ static const String _baseUrl = 'https://localhost:7270/api/';
     }
   }
 
-    static Future<void> addBook(String title, String author) async {
+    static Future<void> addBook(String title, String author, String genre, String descr, double rating, int page) async {
     final token = await _token();
     if (token == null) throw Exception('Not authenticated');
     Uri url = Uri.parse("${_baseUrl}book/addBook");
@@ -180,11 +182,53 @@ static const String _baseUrl = 'https://localhost:7270/api/';
       body: jsonEncode({
         'Title': title,
         'Author': author,
+        "Genre" : genre,
+        "Page": page,
+        "Description" : descr, 
+        "Rating" : rating,
       }),
     );
 
     if (res.statusCode != 200) {
       throw Exception('Return failed: ${res.statusCode} ${res.body}');
     }
+  }
+  Future<int?> getUserIdFromToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('jwt_token');
+    if (token == null) return null;
+
+    final decoded = JwtDecoder.decode(token);
+    print(decoded); 
+
+    // ClaimTypes.NameIdentifier → usually stored as "nameid"
+    if (decoded.containsKey('nameid')) {
+      return int.tryParse(decoded['nameid'].toString());
+    }
+    return null;
+  }
+
+  static Future<List<int>> fetchAiSimilarIds(int userId, {int topK = 3}) async {
+    final uri = Uri.parse('$_aiBase/recommend_similar?user_id=$userId&top_k=$topK');
+    final res = await http.get(uri, headers: {'Accept': 'application/json'});
+    if (res.statusCode != 200) {
+      throw Exception('AI similar IDs failed: ${res.statusCode} ${res.body}');
+    }
+    final data = jsonDecode(res.body) as List<dynamic>;
+      return data.map((e) => e as int).toList();
+  }
+
+  static Future<List<Book>> fetchAiSimilarBooks(int userId, {int topK = 3}) async {
+    final ids = await fetchAiSimilarIds(userId, topK: topK);
+    if (ids.isEmpty) return [];
+
+    final all = await fetchAvailableBooks();
+    final mapById = { for (final b in all) b.id : b };
+    final result = <Book>[];
+    for (final id in ids) {
+      final b = mapById[id];
+      if (b != null) result.add(b);
+    }
+    return result;
   }
 }

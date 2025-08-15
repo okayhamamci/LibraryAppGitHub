@@ -31,7 +31,7 @@ class _LibraryHomeState extends State<LibraryHome> {
         index: _index,
         children: [
           AvailableBooksTab(key: _booksKey, onChanged: _onLibraryChanged), 
-          const EmptyTab(),
+          ExploreTab(userId: 1),
           MyBorrowingsTab(key: _borrowsKey, onChanged: _onLibraryChanged), 
         ],
       ),
@@ -88,6 +88,159 @@ class _AvailableBooksTabState extends State<AvailableBooksTab> with AutomaticKee
 
   Future<void> refresh() => _refresh();
 
+  void _openAddBookDialog(BuildContext context) {
+  final titleController = TextEditingController();
+  final authorController = TextEditingController();
+  final descController = TextEditingController();
+  final pageCountController = TextEditingController(text: '');
+  double rating = 0.0;
+  String? genre;
+
+  final formKey = GlobalKey<FormState>();
+  const genres = [
+    'Fiction', 'Non-Fiction', 'Fantasy', 'Sci-Fi', 'Mystery',
+    'Romance', 'Biography', 'History', 'Self-Help', 'Other'
+  ];
+
+  showDialog(
+    context: context,
+    builder: (ctx) {
+      return StatefulBuilder(
+        builder: (ctx, setState) {
+          return AlertDialog(
+            title: const Text('Add New Book'),
+            content: Form(
+              key: formKey,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextFormField(
+                      controller: titleController,
+                      decoration: const InputDecoration(
+                        labelText: 'Book Title',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (v) =>
+                          (v == null || v.trim().isEmpty) ? 'Required' : null,
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: authorController,
+                      decoration: const InputDecoration(
+                        labelText: 'Author',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (v) =>
+                          (v == null || v.trim().isEmpty) ? 'Required' : null,
+                    ),
+                    const SizedBox(height: 12),
+                    // Genre
+                    DropdownButtonFormField<String>(
+                      value: genre,
+                      decoration: const InputDecoration(
+                        labelText: 'Genre',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: genres
+                          .map((g) => DropdownMenuItem(value: g, child: Text(g)))
+                          .toList(),
+                      onChanged: (v) => setState(() => genre = v),
+                      validator: (v) => (v == null || v.isEmpty)
+                          ? 'Please select a genre'
+                          : null,
+                    ),
+                    const SizedBox(height: 12),
+                    // Rating slider 0..5 (step 0.5)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Rating (0–5)'),
+                        Slider(
+                          value: rating,
+                          min: 0,
+                          max: 5,
+                          divisions: 10,
+                          label: rating.toStringAsFixed(1),
+                          onChanged: (val) =>
+                              setState(() => rating = double.parse(val.toStringAsFixed(1))),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    // Page count
+                    TextFormField(
+                      controller: pageCountController,
+                      decoration: const InputDecoration(
+                        labelText: 'Page Count',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                      validator: (v) {
+                        if (v == null || v.trim().isEmpty) {
+                          return 'Required';
+                        }
+                        final n = int.tryParse(v.trim());
+                        if (n == null || n <= 0) return 'Enter a positive number';
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    // Description (multi-line)
+                    TextFormField(
+                      controller: descController,
+                      maxLines: 4,
+                      decoration: const InputDecoration(
+                        labelText: 'Description',
+                        alignLabelWithHint: true,
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  if (!formKey.currentState!.validate()) return;
+
+                  final title = titleController.text.trim();
+                  final author = authorController.text.trim();
+                  final pageCount = int.parse(pageCountController.text.trim());
+                  try {
+                    await ApiService.addBook(title, author, genre!, descController.text.trim(), rating, pageCount);
+
+                    if (context.mounted) {
+                      Navigator.of(ctx).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Book added successfully')),
+                      );
+                      await _refresh();
+                      widget.onChanged?.call();
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error: $e')),
+                      );
+                    }
+                  }
+                },
+                child: const Text('Add'),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -99,74 +252,7 @@ class _AvailableBooksTabState extends State<AvailableBooksTab> with AutomaticKee
     IconButton(
       icon: const Icon(Icons.add),
       onPressed: () {
-        final titleController = TextEditingController();
-        final authorController = TextEditingController();
-
-        showDialog(
-          context: context,
-          builder: (ctx) {
-            return AlertDialog(
-              title: const Text('Add New Book'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: titleController,
-                    decoration: const InputDecoration(
-                      labelText: 'Book Title',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: authorController,
-                    decoration: const InputDecoration(
-                      labelText: 'Author',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(ctx).pop(),
-                  child: const Text('Cancel'),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    final title = titleController.text.trim();
-                    final author = authorController.text.trim();
-
-                    if (title.isEmpty || author.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Please fill both fields')),
-                      );
-                      return;
-                    }
-                    try {
-                      await ApiService.addBook(title, author);
-                      if (context.mounted) {
-                        Navigator.of(ctx).pop();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Book added successfully')),
-                        );
-                        await _refresh(); // refresh list
-                        widget.onChanged?.call();
-                      }
-                    } catch (e) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Error: $e')),
-                        );
-                      }
-                    }
-                  },
-                  child: const Text('Add'),
-                ),
-              ],
-            );
-          },
-        );
+        _openAddBookDialog(context);
       },
     ),
 ],
@@ -250,16 +336,173 @@ class _AvailableBooksTabState extends State<AvailableBooksTab> with AutomaticKee
   bool get wantKeepAlive => true;
 }
 
-/// ======== TAB 2: EMPTY PLACEHOLDER ======== ///
-class EmptyTab extends StatelessWidget {
-  const EmptyTab({super.key});
+/// ======== TAB 2: EXPLORE (AI Recommendations) ======== ///
+class ExploreTab extends StatefulWidget {
+  const ExploreTab({super.key, required this.userId});
+  final int userId; // pass the current user's ID
+  @override
+  State<ExploreTab> createState() => _ExploreTabState();
+}
+
+class _ExploreTabState extends State<ExploreTab> with AutomaticKeepAliveClientMixin {
+  late Future<List<Book>> _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = ApiService.fetchAiSimilarBooks(widget.userId, topK: 3);
+  }
+
+  Future<void> _refresh() async {
+    final f = ApiService.fetchAiSimilarBooks(widget.userId, topK: 3);
+    setState(() => _future = f);
+    await f;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text('AI Recommendation System')),
+    super.build(context);
+    return Scaffold(
+      appBar: AppBar(title: const Text('AI Recommendations')),
+      body: RefreshIndicator(
+        onRefresh: _refresh,
+        child: FutureBuilder<List<Book>>(
+          future: _future,
+          builder: (context, snap) {
+            if (snap.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snap.hasError) {
+              return _ErrorView(message: snap.error.toString(), onRetry: _refresh);
+            }
+            final recs = snap.data ?? [];
+            if (recs.isEmpty) {
+              return const _EmptyView('No recommendations yet. Borrow at least 3 books.');
+            }
+
+            // 3 panels; responsive fallback to 1 or 2 columns on narrow screens
+            final width = MediaQuery.of(context).size.width;
+            final crossAxisCount = width >= 900 ? 3 : (width >= 600 ? 2 : 1);
+
+            return Padding(
+              padding: const EdgeInsets.all(16),
+              child: GridView.builder(
+                itemCount: recs.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  childAspectRatio: 0.62, // tall card (like your sketch)
+                ),
+                itemBuilder: (_, i) => _RecommendationCard(book: recs[i]),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  @override
+  bool get wantKeepAlive => true;
+}
+
+class _RecommendationCard extends StatelessWidget {
+  const _RecommendationCard({required this.book});
+  final Book book;
+
+  @override
+  Widget build(BuildContext context) {
+    // Outer frame
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.black, width: 2),
+      ),
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        children: [
+          // Small top box: Title (and author)
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.black, width: 2),
+            ),
+            width: double.infinity,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(book.title, maxLines: 1, overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontWeight: FontWeight.w600)),
+                const SizedBox(height: 4),
+                Text(book.author, maxLines: 1, overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 12, color: Colors.black54)),
+              ],
+            ),
+          ),
+
+          const Spacer(),
+
+          // Big bottom box: Description + meta
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.black, width: 2),
+            ),
+            width: double.infinity,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Genre + rating line
+                Row(
+                  children: [
+                    if (book.genre.isNotEmpty)
+                      Text(book.genre, style: const TextStyle(fontSize: 12)),
+                    const Spacer(),
+                    Text('★ ${book.rating.toStringAsFixed(1)}',
+                        style: const TextStyle(fontSize: 12)),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  book.description.isEmpty ? 'No description.' : book.description,
+                  maxLines: 6,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Text('${book.pageCount} pages', style: const TextStyle(fontSize: 12)),
+                    const Spacer(),
+                    TextButton(
+                      onPressed: () async {
+                        try {
+                          await ApiService.borrowBook(book.id);
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Borrowed!')),
+                            );
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(e.toString())),
+                            );
+                          }
+                        }
+                      },
+                      child: const Text('Borrow'),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
+
 
 /// ======== TAB 3: MY BORROWINGS (Ongoing / All) ========
 class MyBorrowingsTab extends StatefulWidget {

@@ -314,6 +314,22 @@
           "author": {
             "type": "string",
             "nullable": true
+          },
+          "genre": {
+            "type": "string",
+            "nullable": true
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "rating": {
+            "type": "number",
+            "format": "double"
           }
         },
         "additionalProperties": false

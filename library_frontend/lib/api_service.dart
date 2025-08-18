@@ -193,17 +193,25 @@ static const String _aiBase  = 'http://localhost:8000';
       throw Exception('Return failed: ${res.statusCode} ${res.body}');
     }
   }
-  Future<int?> getUserIdFromToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('jwt_token');
+  
+    static Future<int?> getUserIdFromToken() async {
+    final token = await _token();
     if (token == null) return null;
 
     final decoded = JwtDecoder.decode(token);
-    print(decoded); 
+    // Try common keys in order:
+    final keys = <String>[
+      'nameid', // some backends
+      'sub', // sometimes used
+      'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier', // YOURS
+    ];
 
-    // ClaimTypes.NameIdentifier → usually stored as "nameid"
-    if (decoded.containsKey('nameid')) {
-      return int.tryParse(decoded['nameid'].toString());
+    for (final k in keys) {
+      final v = decoded[k];
+      if (v != null) {
+        final id = int.tryParse(v.toString());
+        if (id != null) return id;
+      }
     }
     return null;
   }
@@ -220,8 +228,8 @@ static const String _aiBase  = 'http://localhost:8000';
 
   static Future<List<Book>> fetchAiSimilarBooks(int userId, {int topK = 3}) async {
     final ids = await fetchAiSimilarIds(userId, topK: topK);
+    //print(ids);
     if (ids.isEmpty) return [];
-
     final all = await fetchAvailableBooks();
     final mapById = { for (final b in all) b.id : b };
     final result = <Book>[];

@@ -14,6 +14,7 @@ class LibraryHome extends StatefulWidget {
 
 class _LibraryHomeState extends State<LibraryHome> {
   int _index = 0;
+  int? _userId;
 
   final _booksKey = GlobalKey<_AvailableBooksTabState>();
   final _borrowsKey = GlobalKey<_MyBorrowingsTabState>();
@@ -25,13 +26,27 @@ class _LibraryHomeState extends State<LibraryHome> {
   }
 
   @override
+  void initState(){
+    super.initState();
+    _loadUserId();
+  }
+
+  Future<void> _loadUserId() async {
+    final id = await ApiService.getUserIdFromToken(); 
+    setState(() => _userId = id);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
       body: IndexedStack(
         index: _index,
         children: [
           AvailableBooksTab(key: _booksKey, onChanged: _onLibraryChanged), 
-          ExploreTab(userId: 1),
+          _userId == null
+              ? const Center(child: CircularProgressIndicator())
+              : ExploreTab(userId: _userId!), 
           MyBorrowingsTab(key: _borrowsKey, onChanged: _onLibraryChanged), 
         ],
       ),
@@ -392,7 +407,7 @@ class _ExploreTabState extends State<ExploreTab> with AutomaticKeepAliveClientMi
                   crossAxisCount: crossAxisCount,
                   mainAxisSpacing: 16,
                   crossAxisSpacing: 16,
-                  childAspectRatio: 0.62, // tall card (like your sketch)
+                  childAspectRatio: 0.98, // tall card (like your sketch)
                 ),
                 itemBuilder: (_, i) => _RecommendationCard(book: recs[i]),
               ),
@@ -413,95 +428,122 @@ class _RecommendationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Outer frame
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.black, width: 2),
-      ),
-      padding: const EdgeInsets.all(14),
-      child: Column(
-        children: [
-          // Small top box: Title (and author)
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.black, width: 2),
-            ),
-            width: double.infinity,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(book.title, maxLines: 1, overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.w600)),
-                const SizedBox(height: 4),
-                Text(book.author, maxLines: 1, overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 12, color: Colors.black54)),
-              ],
-            ),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        decoration: BoxDecoration(
+          image: const DecorationImage(
+            image: AssetImage('assets/recom.png'),
+            fit: BoxFit.cover,
           ),
-
-          const Spacer(),
-
-          // Big bottom box: Description + meta
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.black, width: 2),
+          border: Border.all(color: Colors.black, width: 2),
+        ),
+        child: Stack(
+          children: [
+            // dark overlay for readability
+            Positioned.fill(
+              child: Container(color: Colors.black.withOpacity(0.35)),
             ),
-            width: double.infinity,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Genre + rating line
-                Row(
-                  children: [
-                    if (book.genre.isNotEmpty)
-                      Text(book.genre, style: const TextStyle(fontSize: 12)),
-                    const Spacer(),
-                    Text('★ ${book.rating.toStringAsFixed(1)}',
-                        style: const TextStyle(fontSize: 12)),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  book.description.isEmpty ? 'No description.' : book.description,
-                  maxLines: 6,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Text('${book.pageCount} pages', style: const TextStyle(fontSize: 12)),
-                    const Spacer(),
-                    TextButton(
-                      onPressed: () async {
-                        try {
-                          await ApiService.borrowBook(book.id);
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Borrowed!')),
-                            );
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(e.toString())),
-                            );
-                          }
-                        }
-                      },
-                      child: const Text('Borrow'),
+            // content
+            Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                children: [
+                  // Top box
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.88),
+                      border: Border.all(color: Colors.black, width: 2),
                     ),
-                  ],
-                )
-              ],
+                    width: double.infinity,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          book.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          book.author,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 12, color: Colors.black87),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const Spacer(),
+
+                  // Bottom box
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.88),
+                      border: Border.all(color: Colors.black, width: 2),
+                    ),
+                    width: double.infinity,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            if (book.genre.isNotEmpty)
+                              Text(book.genre, style: const TextStyle(fontSize: 12)),
+                            const Spacer(),
+                            Text('★ ${book.rating.toStringAsFixed(1)}',
+                                style: const TextStyle(fontSize: 12)),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          book.description.isEmpty ? 'No description.' : book.description,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Text('${book.pageCount} pages', style: const TextStyle(fontSize: 12)),
+                            const Spacer(),
+                            TextButton(
+                              onPressed: () async {
+                                try {
+                                  await ApiService.borrowBook(book.id);
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Borrowed!')),
+                                    );
+                                  }
+                                } catch (e) {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text(e.toString())),
+                                    );
+                                  }
+                                }
+                              },
+                              child: const Text('Borrow'),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
+
 
 
 /// ======== TAB 3: MY BORROWINGS (Ongoing / All) ========

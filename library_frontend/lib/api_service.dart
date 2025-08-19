@@ -157,7 +157,7 @@ static const String _aiBase  = 'http://localhost:8000';
     }
   }
 
-    static Future<void> unArchiveBook(int bookId) async {
+  static Future<void> unArchiveBook(int bookId) async {
     final token = await _token();
     if (token == null) throw Exception('Not authenticated');
     final res = await http.patch(

@@ -6,6 +6,21 @@ import 'package:intl/intl.dart';
 
 String _fmt(DateTime dt) => DateFormat('yyyy-MM-dd HH:mm').format(dt);
 
+const kBg1 = Color(0xFFF7EFE5); // light cream
+const kBg2 = Color(0xFFF1E7D0); // pale beige
+const kBg3 = Color(0xFFEADBC8); // soft sand
+
+const kCard1 = Color(0xFFFFF8EF); // card top
+const kCard2 = Color(0xFFF4E7D8); // card bottom
+const kBorder = Color(0xFFBDA58C); // subtle brown border
+
+const kTextPrimary   = Color(0xFF2F241F); // deep brown
+const kTextSecondary = Color(0xFF6B5E4C); // muted brown
+
+const kPrimary  = Color(0xFF8B5E34); // warm accent (buttons/ongoing)
+const kSuccess  = Color(0xFF10B981); // keep success green
+const kAppBarBg = Color(0xFFF1E7D0); // light app bar
+
 class LibraryHome extends StatefulWidget {
   const LibraryHome({super.key});
   @override
@@ -257,22 +272,37 @@ class _AvailableBooksTabState extends State<AvailableBooksTab> with AutomaticKee
 }
 
   @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(!widget.isArchive ? 'Available Books' : "Archived Books"),
-        actions: [
-  if (widget.isAdmin)
-    IconButton(
-      icon: const Icon(Icons.add),
-      onPressed: () {
-        _openAddBookDialog(context);
-      },
+Widget build(BuildContext context) {
+  super.build(context);
+  return Scaffold(
+    appBar: AppBar(
+      title: Text(
+    !widget.isArchive ? 'Available Books' : "Archived Books",
+    style: const TextStyle(color: kTextPrimary),
+  ),
+      backgroundColor: kAppBarBg,
+      elevation: 0,
+      iconTheme: const IconThemeData(color: kTextPrimary),
+      actions: [
+        if (widget.isAdmin)
+          IconButton(
+            icon: const Icon(Icons.add),
+            style: IconButton.styleFrom(foregroundColor: kTextPrimary),
+            onPressed: () => _openAddBookDialog(context),
+          ),
+      ],
     ),
-],
+    body: Container(
+      // Navy gradient background
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [kBg1, kBg2, kBg3],
+          stops: [0.0, 0.6, 1.0],
+        ),
       ),
-      body: RefreshIndicator(
+      child: RefreshIndicator(
         onRefresh: _refresh,
         child: FutureBuilder<List<Book>>(
           future: _future,
@@ -283,73 +313,336 @@ class _AvailableBooksTabState extends State<AvailableBooksTab> with AutomaticKee
             if (snap.hasError) {
               return _ErrorView(message: snap.error.toString(), onRetry: _refresh);
             }
-            final books = snap.data!;
-            if (books.isEmpty) return const _EmptyView('No available books.');
-            return ListView.separated(
-              padding: const EdgeInsets.all(12),
-              itemBuilder: (_, i) {
-                final b = books[i];
-                return ListTile(
-                  leading: const Icon(Icons.book_outlined),
-                  title: Text(b.title),
-                  subtitle: Text(b.author),
-                  trailing: TextButton(
-                  onPressed: () async {
-                    try {
-                      if (widget.isAdmin) {
-                        // Remove book
-                        await ApiService.deleteBook(b.id);
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Book archived!')),
-                          );
-                        }
-                      } else if(widget.isArchive) {
-                        await ApiService.unArchiveBook(b.id);
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Unarchived!')),
-                          );
-                        }
-                      }
-                      else {
-                        // Borrow book
-                        await ApiService.borrowBook(b.id);
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Borrowed!')),
-                          );
-                        }
-                      }
+            final books = (snap.data ?? []);
+            if (books.isEmpty) {
+              return const _EmptyView('No available books.');
+            }
 
-                      await _refresh();
-                      widget.onChanged?.call();
-                    } catch (e) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(e.toString())),
-                        );
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                final w = constraints.maxWidth;
+                final crossAxisCount = w >= 1100 ? 3 : (w >= 700 ? 2 : 1);
+
+                return GridView.builder(
+                  padding: const EdgeInsets.all(16),
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    // Wider cards for desktop feel
+                    childAspectRatio: crossAxisCount == 1 ? 1.85 : 1.75,
+                  ),
+                  itemCount: books.length,
+                  itemBuilder: (_, i) {
+                    final b = books[i];
+
+                    Future<void> handleAction() async {
+                      try {
+                        if (widget.isAdmin) {
+                          await ApiService.deleteBook(b.id); // archive
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Book archived!')),
+                            );
+                          }
+                        } else if (widget.isArchive) {
+                          await ApiService.unArchiveBook(b.id);
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Unarchived!')),
+                            );
+                          }
+                        } else {
+                          await ApiService.borrowBook(b.id);
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Borrowed!')),
+                            );
+                          }
+                        }
+                        await _refresh();
+                        widget.onChanged?.call();
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(e.toString())),
+                          );
+                        }
                       }
                     }
+
+                    return _BookCard(
+                      book: b,
+                      isAdmin: widget.isAdmin,
+                      isArchive: widget.isArchive,
+                      onPrimaryAction: handleAction,
+                    );
                   },
-                  child: Text(widget.isAdmin 
-                  ? 'Archive' 
-                  : widget.isArchive ? "Unarchive" :'Borrow'),
-                ),
                 );
               },
-              separatorBuilder: (_, __) => const Divider(height: 1),
-              itemCount: books.length,
             );
           },
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   @override
   bool get wantKeepAlive => true;
 }
+
+class _BookCard extends StatelessWidget {
+  final Book book;
+  final bool isAdmin;
+  final bool isArchive;
+  final Future<void> Function() onPrimaryAction;
+
+  const _BookCard({
+    required this.book,
+    required this.isAdmin,
+    required this.isArchive,
+    required this.onPrimaryAction,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final title = book.title;
+    final author = book.author;
+    final genre = (tryGet(() => book.genre) ?? '').toString();
+    final pageCount = tryGet(() => book.pageCount) as int?;
+    final rating = (tryGet(() => book.rating) as num?)?.toDouble() ?? 0;
+    final desc = (tryGet(() => book.description) ?? '').toString();
+
+    final actionLabel = isAdmin
+        ? 'Archive'
+        : (isArchive ? 'Unarchive' : 'Borrow');
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [kCard1, kCard2],
+        ),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: kBorder.withOpacity(0.6)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: () {}, // hook for details if needed
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              _CoverStub(title: title),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: kTextPrimary,
+                        fontSize: 16.5,
+                        fontWeight: FontWeight.w700,
+                        height: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    // Author
+                    Text(
+                      author,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: kTextSecondary,
+                        fontSize: 13.5,
+                      ),
+                    ),
+
+                    // Description (new)
+                    if (desc.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        desc,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: kTextSecondary,
+                          fontSize: 13,
+                          height: 1.35,
+                        ),
+                      ),
+                    ],
+
+                    const SizedBox(height: 10),
+
+                    // Chips & rating
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        if (genre.isNotEmpty) _TagChip(genre),
+                        if (pageCount != null && pageCount > 0)
+                          _TagChip('$pageCount pages'),
+                        _RatingStars(rating: rating),
+                      ],
+                    ),
+                    const Spacer(),
+
+                    // Action row
+                    Row(
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: onPrimaryAction,
+                          icon: Icon(
+                            isAdmin
+                                ? Icons.archive_rounded
+                                : (isArchive
+                                    ? Icons.unarchive_rounded
+                                    : Icons.shopping_bag_outlined),
+                            size: 18,
+                          ),
+                          label: Text(actionLabel),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: kPrimary,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 10),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        OutlinedButton.icon(
+                          onPressed: () {},
+                          icon: const Icon(Icons.info_outline, size: 18),
+                          label: const Text('Details'),
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(
+                                color: Colors.white.withOpacity(0.14)),
+                            foregroundColor: kTextPrimary,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 10),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+// Simple gradient “cover” stub if you don’t have images
+class _CoverStub extends StatelessWidget {
+  final String title;
+  const _CoverStub({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 68,
+      height: 96,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [kCard2, kCard1],
+        ),
+        border: Border.all(color: Colors.white24.withOpacity(0.08)),
+      ),
+      alignment: Alignment.center,
+      child: const Icon(
+        Icons.menu_book_rounded,
+        color: kPrimary,
+        size: 28,
+      ),
+    );
+  }
+}
+
+class _TagChip extends StatelessWidget {
+  final String label;
+  const _TagChip(this.label);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: kPrimary.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white.withOpacity(0.1)),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: kTextPrimary,
+          fontSize: 12.5,
+        ),
+      ),
+    );
+  }
+}
+
+class _RatingStars extends StatelessWidget {
+  final double rating; // 0..5
+  const _RatingStars({required this.rating});
+
+    @override
+  Widget build(BuildContext context) {
+    final full = rating.floor();
+    final hasHalf = (rating - full) >= 0.5;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(5, (i) {
+        if (i < full) {
+          return const Icon(Icons.star_rounded, size: 16, color: Color(0xFFFFC107));
+        } else if (i == full && hasHalf) {
+          return const Icon(Icons.star_half_rounded, size: 16, color: Color(0xFFFFC107));
+        }
+        return Icon(Icons.star_border_rounded, size: 16, color: kTextSecondary.withOpacity(0.5));
+      }),
+    );
+  }
+}
+
+/// Small helper to safely read optional fields without crashing if absent.
+/// Usage: tryGet(() => book.genre)
+T? tryGet<T>(T Function() getter) {
+  try {
+    return getter();
+  } catch (_) {
+    return null;
+  }
+}
+
 
 /// ======== TAB 2: EXPLORE (AI Recommendations) ======== ///
 class ExploreTab extends StatefulWidget {
@@ -378,44 +671,55 @@ class _ExploreTabState extends State<ExploreTab> with AutomaticKeepAliveClientMi
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('AI Recommendations')),
-      body: RefreshIndicator(
-        onRefresh: _refresh,
-        child: FutureBuilder<List<Book>>(
-          future: _future,
-          builder: (context, snap) {
-            if (snap.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (snap.hasError) {
-              return _ErrorView(message: snap.error.toString(), onRetry: _refresh);
-            }
-            final recs = snap.data ?? [];
-            if (recs.isEmpty) {
-              return const _EmptyView('No recommendations yet. Borrow at least 3 books.');
-            }
-
-            // 3 panels; responsive fallback to 1 or 2 columns on narrow screens
-            final width = MediaQuery.of(context).size.width;
-            final crossAxisCount = width >= 900 ? 3 : (width >= 600 ? 2 : 1);
-
-            return Padding(
-              padding: const EdgeInsets.all(16),
-              child: GridView.builder(
-                itemCount: recs.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: crossAxisCount,
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
-                  childAspectRatio: 0.98, // tall card (like your sketch)
-                ),
-                itemBuilder: (_, i) => _RecommendationCard(book: recs[i]),
-              ),
-            );
-          },
-        ),
+  appBar: AppBar(title: const Text('AI Recommendations')),
+  body: Container(
+    decoration: const BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [kBg1, kBg2, kBg3],
+        stops: [0.0, 0.55, 1.0],
       ),
-    );
+    ),
+    child: RefreshIndicator(
+      onRefresh: _refresh,
+      child: FutureBuilder<List<Book>>(
+        future: _future,
+        builder: (context, snap) {
+          if (snap.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snap.hasError) {
+            return _ErrorView(message: snap.error.toString(), onRetry: _refresh);
+          }
+          final recs = snap.data ?? [];
+          if (recs.isEmpty) {
+            return const _EmptyView('No recommendations yet. Borrow at least 3 books.');
+          }
+
+          final width = MediaQuery.of(context).size.width;
+          final crossAxisCount = width >= 900 ? 3 : (width >= 600 ? 2 : 1);
+
+          return Padding(
+            padding: const EdgeInsets.all(16),
+            child: GridView.builder(
+              physics: const AlwaysScrollableScrollPhysics(), // pull-to-refresh even with few items
+              itemCount: recs.length,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                childAspectRatio: 0.98,
+              ),
+              itemBuilder: (_, i) => _RecommendationCard(book: recs[i]),
+            ),
+          );
+        },
+      ),
+    ),
+  ),
+);
+
   }
 
   @override
@@ -598,27 +902,66 @@ class _MyBorrowingsTabState extends State<MyBorrowingsTab> with AutomaticKeepAli
   }
 
   @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('My Borrowings'),
-          bottom: const TabBar(tabs: [
+Widget build(BuildContext context) {
+  super.build(context);
+  return DefaultTabController(
+    length: 2,
+    child: Scaffold(
+      appBar: AppBar(
+        title: const Text('My Borrowings', style: TextStyle(color: Colors.white),),
+        backgroundColor: const Color(0xFF0F172A),
+        elevation: 0,
+        bottom: const TabBar(
+          indicatorSize: TabBarIndicatorSize.tab,
+          labelColor: kTextPrimary,
+          unselectedLabelColor: Colors.white70,
+          indicator: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [kPrimary, Color(0xFFB08968)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+          ),
+          tabs: [
             Tab(text: 'Ongoing'),
             Tab(text: 'All'),
-          ]),
-        ),
-        body: TabBarView(
-          children: [
-            _BorrowingsList(future: _ongoingFuture, onRefresh: _refreshOngoing, showReturn: true, onChanged: widget.onChanged, isAdmin: widget.isAdmin),
-            _BorrowingsList(future: _allFuture, onRefresh: _refreshAll, showReturn: false, onChanged: widget.onChanged, isAdmin: widget.isAdmin),
           ],
         ),
       ),
-    );
-  }
+      body: Container(
+        // Navy gradient background
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [kBg1, kBg2, kBg3],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            stops: [0.0, 0.6, 1.0],
+          ),
+        ),
+        child: TabBarView(
+          children: [
+            _BorrowingsList(
+              future: _ongoingFuture,
+              onRefresh: _refreshOngoing,
+              showReturn: true,
+              onChanged: widget.onChanged,
+              isAdmin: widget.isAdmin,
+            ),
+            _BorrowingsList(
+              future: _allFuture,
+              onRefresh: _refreshAll,
+              showReturn: false,
+              onChanged: widget.onChanged,
+              isAdmin: widget.isAdmin,
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
 
   @override
   bool get wantKeepAlive => true;
@@ -630,19 +973,19 @@ class _BorrowingsList extends StatefulWidget {
   final bool showReturn;
   final VoidCallback? onChanged;
   final bool isAdmin;
-  const _BorrowingsList({required this.future, required this.onRefresh, required this.showReturn, this.onChanged, this.isAdmin = false});
+  const _BorrowingsList({
+    required this.future,
+    required this.onRefresh,
+    required this.showReturn,
+    this.onChanged,
+    this.isAdmin = false,
+  });
 
   @override
   State<_BorrowingsList> createState() => _BorrowingsListState();
 }
 
 class _BorrowingsListState extends State<_BorrowingsList> {
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
@@ -656,48 +999,43 @@ class _BorrowingsListState extends State<_BorrowingsList> {
           if (snap.hasError) {
             return _ErrorView(message: snap.error.toString(), onRetry: widget.onRefresh);
           }
-          final items = snap.data!;
-          if (items.isEmpty) {
-            return const _EmptyView('Nothing here yet.');
-          }
-          return ListView.separated(
-            padding: const EdgeInsets.all(12),
+          final items = snap.data ?? [];
+          if (items.isEmpty) return const _EmptyView('Nothing here yet.');
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            physics: const AlwaysScrollableScrollPhysics(),
             itemCount: items.length,
-            separatorBuilder: (_, __) => const Divider(height: 1),
             itemBuilder: (_, i) {
               final r = items[i];
               final ongoing = r.returnedAt == null;
-              return ListTile(
-                leading: Icon(ongoing ? Icons.timelapse_outlined : Icons.check_circle_outline),
-                title: Text(r.title),
-                subtitle: Text(
-                '${r.author}\nBorrowed: ${_fmt(r.borrowedAt)}'
-                '${r.returnedAt != null ? ' |  Returned: ${_fmt(r.returnedAt!)}' : ''}',
-              ),
-                isThreeLine: true,
-                trailing: (widget.showReturn && ongoing && !widget.isAdmin)
-                    ? TextButton(
-                        onPressed: () async {
-                          try {
-                            //print( "${r.bookId} : ${r.id}");
-                            await ApiService.returnBook(r.bookId);
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Returned!')),
-                              );
-                            }
-                            await widget.onRefresh();
-                          } catch (e) {
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(e.toString())),
-                              );
-                            }
-                          }
-                        },
-                        child: const Text('Return'),
-                      )
-                    : null,
+
+              Future<void> handleReturn() async {
+                try {
+                  await ApiService.returnBook(r.bookId);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Returned!')),
+                    );
+                  }
+                  await widget.onRefresh();
+                  widget.onChanged?.call();
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(e.toString())),
+                    );
+                  }
+                }
+              }
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: _BorrowCard(
+                  record: r,
+                  showReturn: widget.showReturn && ongoing && !widget.isAdmin,
+                  onReturn: handleReturn,
+                ),
               );
             },
           );
@@ -706,6 +1044,237 @@ class _BorrowingsListState extends State<_BorrowingsList> {
     );
   }
 }
+
+
+class _BorrowCard extends StatelessWidget {
+  final BorrowRecord record;
+  final bool showReturn;
+  final Future<void> Function()? onReturn;
+
+  const _BorrowCard({
+    required this.record,
+    this.showReturn = false,
+    this.onReturn,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    
+    final ongoing = record.returnedAt == null;
+
+    final statusText = ongoing ? 'Ongoing' : 'Returned';
+    final statusColor = ongoing ? kPrimary : kSuccess;
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [kCard1, kCard2],
+        ),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.white.withOpacity(0.06)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.35),
+            blurRadius: 18,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: () {}, 
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 6,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.85),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+              const SizedBox(width: 12),
+              CircleAvatar(
+                radius: 22,
+                backgroundColor: Colors.white.withOpacity(0.07),
+                child: Icon(
+                  ongoing ? Icons.timelapse_rounded : Icons.check_circle_rounded,
+                  color: statusColor,
+                ),
+              ),
+              const SizedBox(width: 14),
+              // Content
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title
+                    Text(
+                      record.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: kTextPrimary,
+                        fontSize: 16.5,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            record.author,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: kTextSecondary,
+                              fontSize: 13.5,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        _StatusChip(label: statusText, color: statusColor),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _DatePill(
+                          icon: Icons.login_rounded,
+                          label: 'Borrowed',
+                          value: _fmt(record.borrowedAt),
+                        ),
+                        if (record.returnedAt != null)
+                          _DatePill(
+                            icon: Icons.logout_rounded,
+                            label: 'Returned',
+                            value: _fmt(record.returnedAt!),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    // Actions
+                    Row(
+                      children: [
+                        if (showReturn && onReturn != null)
+                          ElevatedButton.icon(
+                            onPressed: onReturn,
+                            icon: const Icon(Icons.keyboard_return_rounded, size: 18),
+                            label: const Text('Return'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: kPrimary,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                              shape: RoundedRectangleBorder(  
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        const Spacer(),
+                        // Optional secondary action placeholder
+                        OutlinedButton.icon(
+                          onPressed: () {},
+                          icon: const Icon(Icons.info_outline, size: 18),
+                          label: const Text('Details'),
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: Colors.white.withOpacity(0.14)),
+                            foregroundColor: kTextPrimary,
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StatusChip extends StatelessWidget {
+  final String label;
+  final Color color;
+  const _StatusChip({required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 12.5,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.1,
+        ),
+      ),
+    );
+  }
+}
+
+class _DatePill extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  const _DatePill({required this.icon, required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: kPrimary.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: kBorder.withOpacity(0.6)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: Colors.white.withOpacity(0.9)),
+          const SizedBox(width: 6),
+          Text(
+            '$label: ',
+            style: const TextStyle(
+              color: kTextSecondary,
+              fontSize: 12.5,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              color: kTextPrimary,
+              fontSize: 12.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 
 class LibraryAdmin extends StatefulWidget{
 

@@ -43,8 +43,7 @@
               "ViewState": "AgIAAC4AAAAAAAAAAAAkwC0AAAAfAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-08-12T07:40:17.933Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
@@ -54,7 +53,7 @@
               "RelativeDocumentMoniker": "Controllers\\BorrowController.cs",
               "ToolTip": "C:\\Users\\HP\\Desktop\\GitHub\\LibraryAppGitHub\\LibraryApp\\Controllers\\BorrowController.cs",
               "RelativeToolTip": "Controllers\\BorrowController.cs",
-              "ViewState": "AgIAAA4AAAAAAAAAAAAAwB8AAAAgAAAAAAAAAA==",
+              "ViewState": "AgIAAHcAAAAAAAAAAAAswB8AAAAgAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-08-15T12:37:06.409Z",
               "EditorCaption": ""
@@ -69,8 +68,7 @@
               "RelativeToolTip": "appsettings.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAvAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-08-15T08:23:34.276Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-15T08:23:34.276Z"
             },
             {
               "$type": "Document",
@@ -82,8 +80,7 @@
               "RelativeToolTip": "Program.cs",
               "ViewState": "AgIAAAcAAAAAAAAAAAAAAAoAAABCAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-15T08:21:32.429Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-15T08:21:32.429Z"
             },
             {
               "$type": "Document",
@@ -95,8 +92,7 @@
               "RelativeToolTip": "Models\\Book.cs",
               "ViewState": "AgIAAAQAAAAAAAAAAAAzwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-15T08:09:13.823Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-15T08:09:13.823Z"
             }
           ]
         }

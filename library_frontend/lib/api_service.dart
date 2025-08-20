@@ -1,4 +1,3 @@
-// lib/api_service.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
@@ -199,11 +198,10 @@ static const String _aiBase  = 'http://localhost:8000';
     if (token == null) return null;
 
     final decoded = JwtDecoder.decode(token);
-    // Try common keys in order:
     final keys = <String>[
-      'nameid', // some backends
-      'sub', // sometimes used
-      'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier', // YOURS
+      'nameid', 
+      'sub', 
+      'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier', 
     ];
 
     for (final k in keys) {

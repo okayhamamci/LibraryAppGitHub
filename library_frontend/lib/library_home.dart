@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:library_frontend/Models-Providers/book.dart';
 import 'package:library_frontend/Models-Providers/borrowrecord.dart';
 import 'package:library_frontend/api_service.dart';
@@ -133,142 +134,268 @@ class _AvailableBooksTabState extends State<AvailableBooksTab> with AutomaticKee
   ];
 
   showDialog(
-    context: context,
-    builder: (ctx) {
-      return StatefulBuilder(
-        builder: (ctx, setState) {
-          return AlertDialog(
-            title: const Text('Add New Book'),
-            content: Form(
-              key: formKey,
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextFormField(
-                      controller: titleController,
-                      decoration: const InputDecoration(
-                        labelText: 'Book Title',
-                        border: OutlineInputBorder(),
+  context: context,
+  barrierDismissible: false,
+  barrierColor: kBg3.withOpacity(0.35),
+  builder: (ctx) {
+    return StatefulBuilder(
+      builder: (ctx, setState) {
+        InputDecoration dec(String label, IconData icon) {
+          return InputDecoration(
+            labelText: label,
+            labelStyle: const TextStyle(color: kTextSecondary),
+            prefixIcon: Icon(icon, color: kTextSecondary),
+            filled: true,
+            fillColor: kCard1,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: kBorder),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: kBorder),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: kPrimary, width: 1.6),
+            ),
+          );
+        }
+
+        return AlertDialog(
+          backgroundColor: kCard1,
+          elevation: 0,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: const BorderSide(color: kBorder, width: 1),
+          ),
+          titlePadding: EdgeInsets.zero,
+          contentPadding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+          actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+
+          title: Container(
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 16),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [kBg2, kBg3],
+              ),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.menu_book_rounded, color: kTextPrimary),
+                SizedBox(width: 12),
+                Text(
+                  'Add New Book',
+                  style: TextStyle(
+                    color: kTextPrimary,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 18,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          content: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [kCard1, kCard2],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+              borderRadius: BorderRadius.all(Radius.circular(16)),
+            ),
+            child: SizedBox(
+              width: 520,
+              child: Form(
+                key: formKey,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextFormField(
+                        controller: titleController,
+                        style: const TextStyle(color: kTextPrimary),
+                        decoration: dec('Book Title', Icons.book_outlined),
+                        validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                       ),
-                      validator: (v) =>
-                          (v == null || v.trim().isEmpty) ? 'Required' : null,
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: authorController,
-                      decoration: const InputDecoration(
-                        labelText: 'Author',
-                        border: OutlineInputBorder(),
+                      const SizedBox(height: 12),
+
+                      TextFormField(
+                        controller: authorController,
+                        style: const TextStyle(color: kTextPrimary),
+                        decoration: dec('Author', Icons.person_outline),
+                        validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                       ),
-                      validator: (v) =>
-                          (v == null || v.trim().isEmpty) ? 'Required' : null,
-                    ),
-                    const SizedBox(height: 12),
-                    // Genre
-                    DropdownButtonFormField<String>(
-                      value: genre,
-                      decoration: const InputDecoration(
-                        labelText: 'Genre',
-                        border: OutlineInputBorder(),
+                      const SizedBox(height: 12),
+
+                      DropdownButtonFormField<String>(
+                        value: genre,
+                        decoration: dec('Genre', Icons.category_outlined),
+                        dropdownColor: kCard1,
+                        iconEnabledColor: kTextSecondary,
+                        items: genres
+                            .map((g) => DropdownMenuItem(
+                                  value: g,
+                                  child: Text(g, style: const TextStyle(color: kTextPrimary)),
+                                ))
+                            .toList(),
+                        onChanged: (v) => setState(() => genre = v),
+                        validator: (v) => (v == null || v.isEmpty) ? 'Please select a genre' : null,
                       ),
-                      items: genres
-                          .map((g) => DropdownMenuItem(value: g, child: Text(g)))
-                          .toList(),
-                      onChanged: (v) => setState(() => genre = v),
-                      validator: (v) => (v == null || v.isEmpty)
-                          ? 'Please select a genre'
-                          : null,
-                    ),
-                    const SizedBox(height: 12),
-                    // Rating slider 0..5 (step 0.5)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Rating (0–5)'),
-                        Slider(
-                          value: rating,
-                          min: 0,
-                          max: 5,
-                          divisions: 10,
-                          label: rating.toStringAsFixed(1),
-                          onChanged: (val) =>
-                              setState(() => rating = double.parse(val.toStringAsFixed(1))),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    // Page count
-                    TextFormField(
-                      controller: pageCountController,
-                      decoration: const InputDecoration(
-                        labelText: 'Page Count',
-                        border: OutlineInputBorder(),
+                      const SizedBox(height: 12),
+
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Rating (0–5)', style: TextStyle(color: kTextSecondary)),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: SliderTheme(
+                                  data: SliderTheme.of(ctx).copyWith(
+                                    trackHeight: 4,
+                                    activeTrackColor: kPrimary,
+                                    inactiveTrackColor: kBorder.withOpacity(0.4),
+                                    thumbColor: kPrimary,
+                                    overlayColor: kPrimary.withOpacity(0.2),
+                                    thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
+                                    overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
+                                  ),
+                                  child: Slider(
+                                    value: rating,
+                                    min: 0,
+                                    max: 5,
+                                    divisions: 10,
+                                    label: rating.toStringAsFixed(1),
+                                    onChanged: (val) => setState(
+                                      () => rating = double.parse(val.toStringAsFixed(1)),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: kPrimary.withOpacity(0.12),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: kBorder),
+                                ),
+                                child: Text(
+                                  rating.toStringAsFixed(1),
+                                  style: const TextStyle(
+                                    color: kPrimary,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                      keyboardType: TextInputType.number,
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) {
-                          return 'Required';
-                        }
-                        final n = int.tryParse(v.trim());
-                        if (n == null || n <= 0) return 'Enter a positive number';
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    // Description (multi-line)
-                    TextFormField(
-                      controller: descController,
-                      maxLines: 4,
-                      decoration: const InputDecoration(
-                        labelText: 'Description',
-                        alignLabelWithHint: true,
-                        border: OutlineInputBorder(),
+                      const SizedBox(height: 8),
+
+                      TextFormField(
+                        controller: pageCountController,
+                        style: const TextStyle(color: kTextPrimary),
+                        decoration: dec('Page Count', Icons.numbers_outlined),
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        validator: (v) {
+                          if (v == null || v.trim().isEmpty) return 'Required';
+                          final n = int.tryParse(v.trim());
+                          if (n == null || n <= 0) return 'Enter a positive number';
+                          return null;
+                        },
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 12),
+
+                      TextFormField(
+                        controller: descController,
+                        maxLines: 4,
+                        style: const TextStyle(color: kTextPrimary),
+                        decoration: dec('Description', Icons.notes_outlined)
+                            .copyWith(alignLabelWithHint: true),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text('Cancel'),
+          ),
+
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              style: TextButton.styleFrom(
+                foregroundColor: kTextSecondary,
               ),
-              ElevatedButton(
-                onPressed: () async {
-                  if (!formKey.currentState!.validate()) return;
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.save_outlined),
+              label: const Text('Add'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: kPrimary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                elevation: 0,
+              ),
+              onPressed: () async {
+                if (!formKey.currentState!.validate()) return;
 
-                  final title = titleController.text.trim();
-                  final author = authorController.text.trim();
-                  final pageCount = int.parse(pageCountController.text.trim());
-                  try {
-                    await ApiService.addBook(title, author, genre!, descController.text.trim(), rating, pageCount);
+                final title = titleController.text.trim();
+                final author = authorController.text.trim();
+                final pageCount = int.parse(pageCountController.text.trim());
 
-                    if (context.mounted) {
-                      Navigator.of(ctx).pop();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Book added successfully')),
-                      );
-                      await _refresh();
-                      widget.onChanged?.call();
-                    }
-                  } catch (e) {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Error: $e')),
-                      );
-                    }
+                try {
+                  await ApiService.addBook(
+                    title,
+                    author,
+                    genre!,
+                    descController.text.trim(),
+                    rating,
+                    pageCount,
+                  );
+
+                  if (context.mounted) {
+                    Navigator.of(ctx).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Book added successfully'),
+                        backgroundColor: kSuccess,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                    await _refresh();
+                    widget.onChanged?.call();
                   }
-                },
-                child: const Text('Add'),
-              ),
-            ],
-          );
-        },
-      );
-    },
-  );
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error: $e'),
+                        backgroundColor: Colors.red.shade400,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  },
+);
 }
 
   @override
